@@ -18,14 +18,14 @@ export default function SkillsPanel() {
     <>
       <Panel title="Skill Library" className="col-span-2">
         <div className="flex gap-1 flex-wrap mb-3">
-          <span className="text-[10px] px-2 py-0.5" style={{ background: 'var(--hud-bg-panel)', color: 'var(--hud-primary)' }}>
+          <span className="text-[12px] px-2 py-0.5" style={{ background: 'var(--hud-bg-panel)', color: 'var(--hud-primary)' }}>
             {data.total || 0} total
           </span>
-          <span className="text-[10px] px-2 py-0.5" style={{ background: 'var(--hud-bg-panel)', color: 'var(--hud-accent)' }}>
+          <span className="text-[12px] px-2 py-0.5" style={{ background: 'var(--hud-bg-panel)', color: 'var(--hud-accent)' }}>
             {data.custom_count || 0} custom
           </span>
         </div>
-        <div className="space-y-0.5 text-[10px]">
+        <div className="space-y-0.5 text-[12px]">
           {Object.entries(catCounts)
             .sort((a: any, b: any) => b[1] - a[1])
             .map(([cat, count]: any) => (
@@ -57,7 +57,7 @@ export default function SkillsPanel() {
       </Panel>
 
       <Panel title="Recently Modified">
-        <div className="space-y-1.5 text-[10px]">
+        <div className="space-y-1.5 text-[12px]">
           {recentlyMod.map((s: any) => (
             <div key={s.name} className="py-1 px-2" style={{ borderLeft: '2px solid var(--hud-border)' }}>
               <div className="flex justify-between">

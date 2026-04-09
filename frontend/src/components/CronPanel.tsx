@@ -23,7 +23,7 @@ export default function CronPanel() {
 
   const jobs = data.jobs || data || []
   if (!Array.isArray(jobs) || jobs.length === 0) {
-    return <Panel title="Cron Jobs" className="col-span-full"><div className="text-[10px]" style={{ color: 'var(--hud-text-dim)' }}>No cron jobs configured</div></Panel>
+    return <Panel title="Cron Jobs" className="col-span-full"><div className="text-[12px]" style={{ color: 'var(--hud-text-dim)' }}>No cron jobs configured</div></Panel>
   }
 
   return (
@@ -39,7 +39,7 @@ export default function CronPanel() {
                 <span className="font-bold text-[11px]" style={{ color: 'var(--hud-primary)' }}>
                   {job.name || job.id}
                 </span>
-                <span className="text-[9px] px-1.5 py-0.5 ml-auto"
+                <span className="text-[11px] px-1.5 py-0.5 ml-auto"
                   style={{
                     background: 'var(--hud-bg-hover)',
                     color: job.state === 'scheduled' ? 'var(--hud-success)' : 'var(--hud-text-dim)'
@@ -48,7 +48,7 @@ export default function CronPanel() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-4 gap-4 text-[10px]">
+              <div className="grid grid-cols-4 gap-4 text-[12px]">
                 <div>
                   <div className="uppercase tracking-wider" style={{ color: 'var(--hud-text-dim)', fontSize: '9px' }}>Schedule</div>
                   <div style={{ color: 'var(--hud-primary)' }}>{job.schedule_display || job.schedule || '-'}</div>
@@ -75,14 +75,14 @@ export default function CronPanel() {
               </div>
 
               {job.repeat_completed != null && (
-                <div className="mt-2 text-[9px]" style={{ color: 'var(--hud-text-dim)' }}>
+                <div className="mt-2 text-[11px]" style={{ color: 'var(--hud-text-dim)' }}>
                   Runs completed: {job.repeat_completed}{job.repeat_total ? ` / ${job.repeat_total}` : ''}
                   {job.skills?.length > 0 && <span className="ml-2">Skills: {job.skills.join(', ')}</span>}
                 </div>
               )}
 
               {job.prompt && (
-                <div className="mt-2 text-[10px] truncate" style={{ color: 'var(--hud-text-dim)' }}>
+                <div className="mt-2 text-[12px] truncate" style={{ color: 'var(--hud-text-dim)' }}>
                   {job.prompt.slice(0, 120)}...
                 </div>
               )}

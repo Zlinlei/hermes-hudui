@@ -69,7 +69,7 @@ export default function TopBar({ activeTab, onTabChange }: TopBarProps) {
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className="px-2.5 py-1 text-[10px] tracking-widest uppercase transition-all duration-150"
+            className="px-2.5 py-1 text-[12px] tracking-widest uppercase transition-all duration-150"
             style={{
               color: activeTab === tab.id ? 'var(--hud-primary)' : 'var(--hud-text-dim)',
               background: activeTab === tab.id ? 'var(--hud-bg-panel)' : 'transparent',
@@ -87,7 +87,7 @@ export default function TopBar({ activeTab, onTabChange }: TopBarProps) {
       <div className="relative">
         <button
           onClick={() => setShowThemePicker(p => !p)}
-          className="px-2 py-1 text-[10px] tracking-wider uppercase"
+          className="px-2 py-1 text-[12px] tracking-wider uppercase"
           style={{ color: 'var(--hud-text-dim)' }}
           title="Theme (T)"
         >

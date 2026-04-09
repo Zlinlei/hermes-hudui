@@ -4,7 +4,7 @@ import Panel, { Stat, CapacityBar, Sparkline } from './Panel'
 function GrowthDelta({ snapshots }: { snapshots: any[] }) {
   if (!snapshots || snapshots.length < 2) {
     return (
-      <div className="text-[10px]" style={{ color: 'var(--hud-text-dim)' }}>
+      <div className="text-[12px]" style={{ color: 'var(--hud-text-dim)' }}>
         {snapshots?.length === 1 ? 'First snapshot recorded — delta available after next snapshot.' : 'No snapshots yet. Run hermes-hud snapshot to start tracking.'}
       </div>
     )
@@ -25,7 +25,7 @@ function GrowthDelta({ snapshots }: { snapshots: any[] }) {
   ]
 
   return (
-    <div className="space-y-0.5 text-[10px]">
+    <div className="space-y-0.5 text-[12px]">
       <div className="flex justify-between mb-2" style={{ color: 'var(--hud-text-dim)' }}>
         <span>{snapshots.length} snapshots</span>
         <span>{previous.timestamp?.slice(0, 10)} → {current.timestamp?.slice(0, 10)}</span>
@@ -79,7 +79,7 @@ export default function DashboardPanel() {
     <>
       {/* Row 1: overview + activity sparkline */}
       <Panel title="Overview">
-        <div className="text-[10px] mb-3" style={{ color: 'var(--hud-text-dim)' }}>
+        <div className="text-[12px] mb-3" style={{ color: 'var(--hud-text-dim)' }}>
           {config?.provider}<span style={{ color: 'var(--hud-primary)' }}>/</span>{config?.model}
         </div>
         <div className="grid grid-cols-2 gap-3 mb-4">
@@ -93,7 +93,7 @@ export default function DashboardPanel() {
         <CapacityBar value={user?.total_chars || 0} max={user?.max_chars || 1375} label="USER" />
 
         {sessions?.date_range?.[0] && (
-          <div className="text-[10px] mt-3" style={{ color: 'var(--hud-text-dim)' }}>
+          <div className="text-[12px] mt-3" style={{ color: 'var(--hud-text-dim)' }}>
             {new Date(sessions.date_range[0]).toLocaleDateString()} → {new Date(sessions.date_range[1]).toLocaleDateString()}
           </div>
         )}
@@ -102,19 +102,19 @@ export default function DashboardPanel() {
       <Panel title="Activity" className="col-span-2">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>
+            <div className="text-[11px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>
               Messages/day · last {dailyMessages.length}d
             </div>
             <Sparkline values={dailyMessages} width={360} height={45} />
           </div>
           <div>
-            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>
+            <div className="text-[11px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>
               Tokens/day
             </div>
             <Sparkline values={dailyTokens} width={360} height={45} />
           </div>
         </div>
-        <div className="mt-3 text-[10px] grid grid-cols-5 gap-1">
+        <div className="mt-3 text-[12px] grid grid-cols-5 gap-1">
           {sessions?.daily_stats?.slice(-10).map((d: any) => (
             <div key={d.date} className="text-center py-1" style={{ background: 'var(--hud-bg-panel)' }}>
               <div style={{ color: 'var(--hud-text-dim)' }}>{d.date.slice(5)}</div>
@@ -127,7 +127,7 @@ export default function DashboardPanel() {
 
       {/* Row 2: tools + growth delta + platforms */}
       <Panel title="Top Tools">
-        <div className="text-[10px] space-y-0.5">
+        <div className="text-[12px] space-y-0.5">
           {sessions?.tool_usage && Object.entries(sessions.tool_usage)
             .sort((a: any, b: any) => b[1] - a[1])
             .slice(0, 12)
@@ -165,7 +165,7 @@ export default function DashboardPanel() {
           ))}
         </div>
         {sessions?.daily_stats?.length > 0 && (
-          <div className="mt-3 text-[10px]" style={{ color: 'var(--hud-text-dim)' }}>
+          <div className="mt-3 text-[12px]" style={{ color: 'var(--hud-text-dim)' }}>
             Total tokens: {(sessions?.total_tokens || 0).toLocaleString()}
           </div>
         )}

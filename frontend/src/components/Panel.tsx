@@ -9,7 +9,7 @@ interface PanelProps {
 export default function Panel({ title, children, className = '' }: PanelProps) {
   return (
     <div className={`hud-panel ${className}`}>
-      <span className="hud-panel-title">{title}</span>
+      <div className="hud-panel-title">{title}</div>
       <div className="hud-panel-content">
         {children}
       </div>
@@ -33,7 +33,7 @@ export function CapacityBar({ value, max, label }: { value: number; max: number;
   const level = pct > 90 ? 'critical' : pct > 70 ? 'warn' : 'ok'
   return (
     <div className="mb-2">
-      <div className="flex justify-between text-[10px] mb-0.5">
+      <div className="flex justify-between text-[11px] mb-1">
         <span style={{ color: 'var(--hud-text-dim)' }}>{label}</span>
         <span>
           <span style={{ color: 'var(--hud-primary)' }}>{value.toLocaleString()}</span>

@@ -17,7 +17,7 @@ export default function SessionsPanel() {
   return (
     <>
       <Panel title="Session Activity" className="col-span-2">
-        <div className="flex gap-6 mb-3 text-[10px]">
+        <div className="flex gap-6 mb-3 text-[12px]">
           <div>
             <span className="stat-value text-base">{data.total_sessions || 0}</span>
             <span className="stat-label ml-1">sessions</span>
@@ -38,17 +38,17 @@ export default function SessionsPanel() {
           ))}
         </div>
         <div className="mb-2">
-          <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Messages/day</div>
+          <div className="text-[11px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Messages/day</div>
           <Sparkline values={dailyMessages} width={500} height={50} />
         </div>
         <div>
-          <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Sessions/day</div>
+          <div className="text-[11px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Sessions/day</div>
           <Sparkline values={dailySessions} width={500} height={30} />
         </div>
       </Panel>
 
       <Panel title="Recent Sessions">
-        <div className="space-y-0.5 text-[10px]">
+        <div className="space-y-0.5 text-[12px]">
           {sessions.slice(0, 15).map((s: any) => (
             <div key={s.id} className="flex items-center gap-2 py-0.5" style={{ borderBottom: '1px solid var(--hud-border)' }}>
               <span className="w-2 h-2 rounded-full flex-shrink-0"

@@ -14,7 +14,7 @@ export default function HealthPanel() {
   return (
     <>
       <Panel title="API Keys" className="col-span-1">
-        <div className="space-y-1 text-[10px]">
+        <div className="space-y-1 text-[12px]">
           {keys.map((k: any, i: number) => (
             <div key={i} className="flex justify-between py-0.5">
               <span className="truncate mr-2">{k.name}</span>
@@ -24,7 +24,7 @@ export default function HealthPanel() {
             </div>
           ))}
         </div>
-        <div className="mt-2 pt-2 text-[10px]" style={{ borderTop: '1px solid var(--hud-border)' }}>
+        <div className="mt-2 pt-2 text-[12px]" style={{ borderTop: '1px solid var(--hud-border)' }}>
           <span style={{ color: 'var(--hud-success)' }}>{data.keys_ok || 0}</span>
           <span style={{ color: 'var(--hud-text-dim)' }}> configured · </span>
           <span style={{ color: data.keys_missing > 0 ? 'var(--hud-error)' : 'var(--hud-text-dim)' }}>{data.keys_missing || 0}</span>
@@ -33,7 +33,7 @@ export default function HealthPanel() {
       </Panel>
 
       <Panel title="Services" className="col-span-1">
-        <div className="space-y-2 text-[10px]">
+        <div className="space-y-2 text-[12px]">
           {services.map((s: any, i: number) => (
             <div key={i} className="py-1 px-2" style={{ borderLeft: `2px solid ${s.running ? 'var(--hud-success)' : 'var(--hud-error)'}` }}>
               <div className="flex justify-between">
@@ -47,7 +47,7 @@ export default function HealthPanel() {
             </div>
           ))}
         </div>
-        <div className="mt-3 text-[10px]" style={{ color: 'var(--hud-text-dim)' }}>
+        <div className="mt-3 text-[12px]" style={{ color: 'var(--hud-text-dim)' }}>
           <div>Provider: {data.config_provider || '-'}</div>
           <div>Model: {data.config_model || '-'}</div>
           <div>DB: {data.state_db_exists ? `${(data.state_db_size / 1048576).toFixed(1)}MB` : 'missing'}</div>

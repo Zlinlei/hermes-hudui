@@ -89,7 +89,7 @@ export default function BootScreen({ onComplete }: BootScreenProps) {
         ))}
       </div>
 
-      <div className="absolute bottom-6 text-[9px]" style={{ color: 'var(--hud-text-dim)' }}>
+      <div className="absolute bottom-6 text-[11px]" style={{ color: 'var(--hud-text-dim)' }}>
         click to skip
       </div>
     </div>

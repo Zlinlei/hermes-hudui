@@ -22,7 +22,7 @@ export default function ProfilesPanel() {
                 {p.name}{p.is_default ? ' ★' : ''}
               </span>
             </div>
-            <div className="text-[9px] space-y-0.5" style={{ color: 'var(--hud-text-dim)' }}>
+            <div className="text-[11px] space-y-0.5" style={{ color: 'var(--hud-text-dim)' }}>
               <div>{p.provider}/{p.model || 'no model'}</div>
               {p.soul_summary && <div className="italic truncate" style={{ color: 'var(--hud-text)' }}>{p.soul_summary}</div>}
               <div className="grid grid-cols-3 gap-1 mt-2 text-center">

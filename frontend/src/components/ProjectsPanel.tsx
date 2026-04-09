@@ -10,7 +10,7 @@ export default function ProjectsPanel() {
 
   const projects = data.projects || data || []
   if (!Array.isArray(projects) || projects.length === 0) {
-    return <Panel title="Projects" className="col-span-full"><div className="text-[10px]" style={{ color: 'var(--hud-text-dim)' }}>No projects found in ~/projects</div></Panel>
+    return <Panel title="Projects" className="col-span-full"><div className="text-[12px]" style={{ color: 'var(--hud-text-dim)' }}>No projects found in ~/projects</div></Panel>
   }
 
   // Sort: dirty first, then by last modified
@@ -24,7 +24,7 @@ export default function ProjectsPanel() {
     <Panel title="Projects" className="col-span-full">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         {sorted.map((p: any) => (
-          <div key={p.name} className="p-2.5 text-[10px]"
+          <div key={p.name} className="p-2.5 text-[12px]"
             style={{
               background: 'var(--hud-bg-panel)',
               borderLeft: `3px solid ${p.dirty_files > 0 ? 'var(--hud-warning)' : p.is_git ? 'var(--hud-primary)' : 'var(--hud-text-dim)'}`,

@@ -36,7 +36,7 @@ export default function PatternsPanel() {
   return (
     <>
       <Panel title="Task Clusters" className="col-span-1">
-        <div className="space-y-1.5 text-[10px]">
+        <div className="space-y-1.5 text-[12px]">
           {(data.clusters || []).map((c: any) => (
             <div key={c.label} className="py-1 px-2" style={{ borderLeft: '2px solid var(--hud-border)' }}>
               <div className="flex justify-between">
@@ -57,14 +57,14 @@ export default function PatternsPanel() {
           <span>00</span><span>06</span><span>12</span><span>18</span><span>23</span>
         </div>
         {data.peak_hour !== null && (
-          <div className="mt-2 text-[10px]">
+          <div className="mt-2 text-[12px]">
             Peak: <span style={{ color: 'var(--hud-primary)' }}>{String(data.peak_hour).padStart(2, '0')}:00</span>
           </div>
         )}
       </Panel>
 
       <Panel title="Repeated Prompts" className="col-span-1">
-        <div className="space-y-1 text-[10px]">
+        <div className="space-y-1 text-[12px]">
           {(data.repeated_prompts || []).map((r: any, i: number) => (
             <div key={i} className="flex gap-2 py-0.5">
               <span className="tabular-nums" style={{ color: 'var(--hud-primary)' }}>{r.count}×</span>

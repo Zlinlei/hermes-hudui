@@ -60,7 +60,7 @@ export default function App() {
         <TabContent tab={activeTab} />
       </main>
       {/* Status bar */}
-      <div className="flex items-center justify-between px-3 py-0.5 text-[9px] border-t"
+      <div className="flex items-center justify-between px-3 py-0.5 text-[11px] border-t"
            style={{ borderColor: 'var(--hud-border)', color: 'var(--hud-text-dim)', background: 'var(--hud-bg-surface)' }}>
         <span>☤ hermes-hudui v0.1.0</span>
         <span>
