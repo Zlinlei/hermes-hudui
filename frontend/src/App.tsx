@@ -12,6 +12,7 @@ import CronPanel from './components/CronPanel'
 import ProjectsPanel from './components/ProjectsPanel'
 import HealthPanel from './components/HealthPanel'
 import AgentsPanel from './components/AgentsPanel'
+import ChatPanel from './components/ChatPanel'
 import ProfilesPanel from './components/ProfilesPanel'
 import TokenCostsPanel from './components/TokenCostsPanel'
 
@@ -25,6 +26,7 @@ function TabContent({ tab }: { tab: TabId }) {
     case 'projects': return <ProjectsPanel />
     case 'health': return <HealthPanel />
     case 'agents': return <AgentsPanel />
+    case 'chat': return <ChatPanel />
     case 'profiles': return <ProfilesPanel />
     case 'token-costs': return <TokenCostsPanel />
     default: return <DashboardPanel />
@@ -41,6 +43,7 @@ const GRID_CLASS: Record<TabId, string> = {
   projects: 'grid-cols-1',
   health: 'grid-cols-1 sm:grid-cols-2',
   agents: 'grid-cols-1 lg:grid-cols-2',
+  chat: 'grid-cols-1',  // Full width for chat
   profiles: 'grid-cols-1',
   'token-costs': 'grid-cols-1 lg:grid-cols-2',
 }
@@ -59,14 +62,16 @@ export default function App() {
     sessionStorage.setItem('hud-booted', 'true')
   }, [])
 
-  // Command palette commands
+  // Command palette commands (only include tabs with keyboard shortcuts)
   const commands = useMemo(() => [
-    ...TABS.map(tab => ({
+    ...TABS.filter(tab => tab.key !== null).map(tab => ({
       id: tab.id,
       label: `${tab.label}`,
-      shortcut: tab.key,
+      shortcut: tab.key as string,
       action: () => setActiveTab(tab.id),
     })),
+    // Add Costs tab without shortcut
+    { id: 'token-costs', label: 'Costs', shortcut: '', action: () => setActiveTab('token-costs') },
   ], [])
 
   const handleCommandSelect = useCallback((id: string) => {
