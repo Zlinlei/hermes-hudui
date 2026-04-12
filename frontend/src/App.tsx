@@ -114,7 +114,7 @@ export default function App() {
       <div className="flex items-center justify-between px-3 py-0.5 text-[13px] border-t shrink-0"
            style={{ borderColor: 'var(--hud-border)', color: 'var(--hud-text-dim)', background: 'var(--hud-bg-surface)' }}>
         <span className="flex items-center gap-2">
-          ☤ hermes-hudui v0.2.0
+          ☤ hermes-hudui v0.3.0
           {/* WebSocket status indicator */}
           <span 
             className="text-[10px] px-1.5 py-0.5 rounded"

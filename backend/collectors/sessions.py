@@ -51,7 +51,6 @@ def _do_collect_sessions(db_path: str) -> SessionsState:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
-        # Fetch all sessions
         cursor.execute("""
             SELECT id, source, title, started_at, ended_at,
                    message_count, tool_call_count,
@@ -59,6 +58,7 @@ def _do_collect_sessions(db_path: str) -> SessionsState:
                    cache_read_tokens, cache_write_tokens,
                    reasoning_tokens, estimated_cost_usd, model_config
             FROM sessions
+            WHERE source != 'tool'
             ORDER BY started_at DESC
         """)
 

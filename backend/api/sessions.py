@@ -40,7 +40,7 @@ async def search_sessions(q: str = Query(..., min_length=1)):
             """
             SELECT id, source, title, started_at, message_count, tool_call_count
             FROM sessions
-            WHERE title LIKE ?
+            WHERE title LIKE ? AND source != 'tool'
             ORDER BY started_at DESC
             LIMIT 20
             """,
@@ -69,7 +69,7 @@ async def search_sessions(q: str = Query(..., min_length=1)):
                 FROM messages_fts
                 JOIN messages m ON messages_fts.rowid = m.rowid
                 JOIN sessions s ON m.session_id = s.id
-                WHERE messages_fts MATCH ?
+                WHERE messages_fts MATCH ? AND s.source != 'tool'
                 ORDER BY m.timestamp DESC
                 LIMIT 30
                 """,

@@ -10,7 +10,7 @@ const HERMES_ASCII = [
 ]
 
 const BOOT_LINES = [
-  '☤ HERMES HUD v0.2.0',
+  '☤ HERMES HUD v0.3.0',
   '',
   'Initializing consciousness monitor...',
   'Reading ~/.hermes/state.db',
