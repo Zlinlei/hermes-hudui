@@ -246,11 +246,14 @@ class ChatEngine:
                         in_warning_block = True
                         continue
 
-                    # A blank line ends the warning block
+                    # A blank line or non-indented line ends the warning block
                     if in_warning_block:
                         if not stripped:
                             in_warning_block = False
-                        continue
+                            continue
+                        if text[0] in (' ', '\t'):
+                            continue  # indented continuation — still in warning
+                        in_warning_block = False  # non-indented line — fall through
 
                     # Capture session ID for post-completion tool event query
                     m = _SESSION_ID_RE.match(stripped)

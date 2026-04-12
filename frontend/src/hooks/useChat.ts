@@ -273,17 +273,15 @@ export function useChat(sessionId: string | null) {
       }
 
       eventSource.onerror = () => {
-        // Connection closed or error
-        if (isStreaming) {
-          setIsStreaming(false)
-          setMessages(prev =>
-            prev.map(msg =>
-              msg.id === assistantMessageId
-                ? { ...msg, isStreaming: false }
-                : msg
-            )
+        // Unconditional cleanup — don't guard on `isStreaming` (stale closure)
+        setIsStreaming(false)
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === assistantMessageId
+              ? { ...msg, isStreaming: false, content: msg.content || '[connection lost]' }
+              : msg
           )
-        }
+        )
         eventSource.close()
       }
 
@@ -298,7 +296,7 @@ export function useChat(sessionId: string | null) {
         )
       )
     }
-  }, [sessionId, isStreaming])
+  }, [sessionId])
 
   const updateAssistantToolCalls = (assistantMessageId: string) => {
     const toolCalls = Object.values(currentToolCallsRef.current)
