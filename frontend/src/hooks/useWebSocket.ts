@@ -16,7 +16,7 @@ interface UseWebSocketReturn {
   sendMessage: (data: string) => void
 }
 
-const WS_URL = `ws://${window.location.host}/ws`
+const WS_URL = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`
 
 export function useWebSocket(): UseWebSocketReturn {
   const [status, setStatus] = useState<WebSocketStatus>('disconnected')
