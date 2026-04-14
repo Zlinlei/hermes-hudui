@@ -28,12 +28,12 @@ export default function AgentsPanel() {
   return (
     <>
       {/* Live processes */}
-      <Panel title={`Live Agents — ${data.live_count} live, ${idle.length} idle`}>
+      <Panel title={`${t('agents.liveAgents')} — ${data.live_count} ${t('agents.live')}, ${idle.length} ${t('agents.idle')}`}>
         {/* Operator alerts */}
         {alerts.length > 0 && (
           <div className="mb-3">
             <div className="text-[13px] font-bold mb-1" style={{ color: 'var(--hud-warning)' }}>
-              OPERATOR QUEUE — {alerts.length} waiting
+              {t('agents.operatorQueue')} — {alerts.length} {t('agents.waiting')}
             </div>
             {alerts.map((a: any, i: number) => (
               <div key={i} className="py-1 text-[13px]" style={{ borderLeft: '2px solid var(--hud-warning)' }}>
@@ -55,8 +55,8 @@ export default function AgentsPanel() {
                 <span style={{ color: 'var(--hud-success)' }}>▸</span>
                 <span className="font-bold">{proc.name}</span>
                 {proc.pid && <span className="text-[13px] tabular-nums" style={{ color: 'var(--hud-text-dim)' }}>[{proc.pid}]</span>}
-                <span className="text-[13px]" style={{ color: 'var(--hud-success)' }}>alive</span>
-                {proc.uptime && <span className="text-[13px]" style={{ color: 'var(--hud-text-dim)' }}>up {proc.uptime}</span>}
+                <span className="text-[13px]" style={{ color: 'var(--hud-success)' }}>{t('agents.alive')}</span>
+                {proc.uptime && <span className="text-[13px]" style={{ color: 'var(--hud-text-dim)' }}>{t('agents.up')} {proc.uptime}</span>}
                 {proc.mem_mb && <span className="text-[13px]" style={{ color: 'var(--hud-text-dim)' }}>{proc.mem_mb} MB</span>}
                 {proc.cwd && <span className="text-[13px] truncate" style={{ color: 'var(--hud-text-dim)' }}>{proc.cwd}</span>}
                 {proc.tmux_jump_hint && <span className="text-[13px]" style={{ color: 'var(--hud-accent)' }}>→ {proc.tmux_jump_hint}</span>}
@@ -72,7 +72,7 @@ export default function AgentsPanel() {
           {/* Idle agents */}
           {idle.length > 0 && (
             <div className="text-[13px] mt-2">
-              <div className="text-[13px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Not running</div>
+              <div className="text-[13px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>{t('agents.notRunning')}</div>
               <div className="flex flex-wrap gap-2">
                 {idle.map((proc: any, i: number) => (
                   <span key={`${proc.name}-${i}`} className="px-2 py-0.5" style={{ background: 'var(--hud-bg-panel)', color: 'var(--hud-text-dim)' }}>
@@ -88,11 +88,11 @@ export default function AgentsPanel() {
         {data.has_tmux && tmuxPanes.length > 0 && (
           <div className="mt-3 text-[13px]">
             <div className="uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>
-              tmux panes — {tmuxPanes.length} total, {data.matched_pane_count} mapped
+              {t('agents.tmuxPanes')} — {tmuxPanes.length} {t('agents.total')}, {data.matched_pane_count} {t('agents.mapped')}
             </div>
             {data.unmatched_interesting_panes?.map((pane: any, i: number) => (
               <div key={i} style={{ color: 'var(--hud-text-dim)' }}>
-                {pane.pane_id}  {pane.session_name}:{pane.window_index}.{pane.pane_index}  {pane.current_command}  (unmatched)
+                {pane.pane_id}  {pane.session_name}:{pane.window_index}.{pane.pane_index}  {pane.current_command}  ({t('agents.unmatched')})
               </div>
             ))}
           </div>
@@ -100,7 +100,7 @@ export default function AgentsPanel() {
       </Panel>
 
       {/* Recent sessions */}
-      <Panel title={`Recent Activity — last ${recentSessions.length} sessions`}>
+      <Panel title={`${t('agents.recentActivity')} — ${t('agents.lastSessions')} ${recentSessions.length} ${t('agents.sessions')}`}>
         <div className="space-y-0.5">
           {recentSessions.map((sess: any, i: number) => {
             const style = SOURCE_STYLES[sess.source] || { color: 'var(--hud-text-dim)', label: sess.source }
@@ -114,7 +114,7 @@ export default function AgentsPanel() {
                   {style.label}
                 </span>
                 <span className="truncate flex-1">
-                  {sess.title || 'untitled'}
+                  {sess.title || t('agents.untitled')}
                 </span>
                 <span className="text-[13px] flex-shrink-0 tabular-nums" style={{ color: 'var(--hud-text-dim)' }}>
                   {sess.message_count}m

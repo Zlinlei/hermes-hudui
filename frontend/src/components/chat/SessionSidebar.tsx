@@ -73,7 +73,7 @@ export default function SessionSidebar({
                   ●
                 </span>
                 {session.backend_type}
-                {!session.is_active && ' (ended)'}
+                {!session.is_active && ` (${t('sessions.ended')})`}
               </div>
             </button>
           ))

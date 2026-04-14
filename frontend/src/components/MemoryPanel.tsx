@@ -255,18 +255,18 @@ export default function MemoryPanel() {
   return (
     <>
       <Panel title={t('memory.title')} className="col-span-1">
-        <CapacityBar value={memory?.total_chars || 0} max={memory?.max_chars || 2200} label="CAPACITY" />
+        <CapacityBar value={memory?.total_chars || 0} max={memory?.max_chars || 2200} label={t('memory.capacity')} />
         <div className="text-[13px] my-2" style={{ color: 'var(--hud-text-dim)' }}>
-          {memory?.entry_count || 0} entries · {Object.entries(memory?.count_by_category || {}).map(([k,v]) => `${k}(${v})`).join(' ')}
+          {memory?.entry_count || 0} {t('memory.entries')} · {Object.entries(memory?.count_by_category || {}).map(([k,v]) => `${k}(${v})`).join(' ')}
         </div>
         <MemoryEntries entries={memory?.entries || []} target="memory" onMutate={mutate} />
         <AddEntryForm target="memory" onMutate={mutate} />
       </Panel>
 
-      <Panel title="User Profile" className="col-span-1">
-        <CapacityBar value={user?.total_chars || 0} max={user?.max_chars || 1375} label="CAPACITY" />
+      <Panel title={t('memory.userProfile')} className="col-span-1">
+        <CapacityBar value={user?.total_chars || 0} max={user?.max_chars || 1375} label={t('memory.capacity')} />
         <div className="text-[13px] my-2" style={{ color: 'var(--hud-text-dim)' }}>
-          {user?.entry_count || 0} entries
+          {user?.entry_count || 0} {t('memory.entries')}
         </div>
         <MemoryEntries entries={user?.entries || []} target="user" onMutate={mutate} />
         <AddEntryForm target="user" onMutate={mutate} />

@@ -83,16 +83,17 @@ function TranscriptViewer({ sessionId, onClose }: { sessionId: string; onClose: 
 // ── Search results ─────────────────────────────────────────────────────────────
 
 function SearchResults({ query, onSelect }: { query: string; onSelect: (id: string) => void }) {
+  const { t } = useTranslation()
   const { data, isLoading } = useApi(`/sessions/search?q=${encodeURIComponent(query)}`, 0)
 
   if (isLoading) {
-    return <div className="text-[13px] animate-pulse py-2" style={{ color: 'var(--hud-text-dim)' }}>Searching...</div>
+    return <div className="text-[13px] animate-pulse py-2" style={{ color: 'var(--hud-text-dim)' }}>{t('sessions.searching')}</div>
   }
 
   const results = data || []
 
   if (!results.length) {
-    return <div className="text-[13px] py-2" style={{ color: 'var(--hud-text-dim)' }}>No results for "{query}"</div>
+    return <div className="text-[13px] py-2" style={{ color: 'var(--hud-text-dim)' }}>{t('sessions.noResultsFor')} "{query}"</div>
   }
 
   return (
@@ -116,7 +117,7 @@ function SearchResults({ query, onSelect }: { query: string; onSelect: (id: stri
             />
             <span className="flex-1 truncate">{r.title}</span>
             <span className="text-[11px] shrink-0" style={{ color: 'var(--hud-text-dim)' }}>
-              {r.match_type === 'content' ? 'content' : 'title'}
+              {r.match_type === 'content' ? t('sessions.matchContent') : t('sessions.matchTitle')}
             </span>
           </div>
           {r.snippet && (
@@ -171,19 +172,19 @@ export default function SessionsPanel() {
         />
       )}
 
-      <Panel title="Session Activity" className="col-span-2">
+      <Panel title={t('sessions.activity')} className="col-span-2">
         <div className="flex gap-6 mb-3 text-[13px]">
           <div>
             <span className="stat-value text-base">{data.total_sessions || 0}</span>
-            <span className="stat-label ml-1">sessions</span>
+            <span className="stat-label ml-1">{t('sessions.sessions')}</span>
           </div>
           <div>
             <span className="stat-value text-base">{(data.total_messages || 0).toLocaleString()}</span>
-            <span className="stat-label ml-1">messages</span>
+            <span className="stat-label ml-1">{t('sessions.messages')}</span>
           </div>
           <div>
             <span className="stat-value text-base">{(data.total_tokens || 0).toLocaleString()}</span>
-            <span className="stat-label ml-1">tokens</span>
+            <span className="stat-label ml-1">{t('sessions.tokensLabel')}</span>
           </div>
           {Object.entries(bySource).map(([src, count]: any) => (
             <div key={src}>
@@ -193,11 +194,11 @@ export default function SessionsPanel() {
           ))}
         </div>
         <div className="mb-2">
-          <div className="text-[13px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Messages/day</div>
+          <div className="text-[13px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>{t('sessions.messagesPerDay')}</div>
           <Sparkline values={dailyMessages} width={500} height={50} />
         </div>
         <div>
-          <div className="text-[13px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>Sessions/day</div>
+          <div className="text-[13px] uppercase tracking-wider mb-1" style={{ color: 'var(--hud-text-dim)' }}>{t('sessions.sessionsPerDay')}</div>
           <Sparkline values={dailySessions} width={500} height={30} />
         </div>
       </Panel>
@@ -233,7 +234,7 @@ export default function SessionsPanel() {
               className="px-2 py-1 text-[12px] cursor-pointer disabled:opacity-40"
               style={{ background: 'var(--hud-primary)', color: 'var(--hud-bg-deep)', border: 'none' }}
             >
-              Search
+              {t('sessions.search')}
             </button>
           )}
         </form>
@@ -251,7 +252,7 @@ export default function SessionsPanel() {
                 style={{ borderBottom: '1px solid var(--hud-border)', background: 'transparent' }}
                 onMouseEnter={hoverOn}
                 onMouseLeave={hoverOff}
-                title="Click to read transcript"
+                title={t('sessions.clickToRead')}
               >
                 <span className="w-2 h-2 rounded-full flex-shrink-0"
                   style={{ background: sourceColor(s.source) }} />

@@ -83,7 +83,7 @@ export default function CronPanel() {
                         className="px-2 py-0.5 text-[11px] cursor-pointer disabled:opacity-40"
                         style={{ background: 'var(--hud-success)', color: 'var(--hud-bg-deep)' }}
                       >
-                        {isBusy('resume') ? '...' : 'Resume'}
+                        {isBusy('resume') ? '...' : t('cron.resume')}
                       </button>
                     ) : (
                       <>
@@ -93,7 +93,7 @@ export default function CronPanel() {
                           className="px-2 py-0.5 text-[11px] cursor-pointer disabled:opacity-40"
                           style={{ background: 'var(--hud-accent)', color: 'var(--hud-bg-deep)' }}
                         >
-                          {isBusy('run') ? '...' : 'Run'}
+                          {isBusy('run') ? '...' : t('cron.run')}
                         </button>
                         <button
                           onClick={() => act(job.id, 'pause')}
@@ -101,7 +101,7 @@ export default function CronPanel() {
                           className="px-2 py-0.5 text-[11px] cursor-pointer disabled:opacity-40"
                           style={{ background: 'var(--hud-bg-hover)', color: 'var(--hud-text-dim)' }}
                         >
-                          {isBusy('pause') ? '...' : 'Pause'}
+                          {isBusy('pause') ? '...' : t('cron.pause')}
                         </button>
                       </>
                     )
@@ -115,7 +115,7 @@ export default function CronPanel() {
                         className="px-2 py-0.5 text-[11px] cursor-pointer disabled:opacity-40"
                         style={{ background: 'var(--hud-error)', color: 'var(--hud-bg-deep)' }}
                       >
-                        {isBusy('delete') ? '...' : 'Confirm'}
+                        {isBusy('delete') ? '...' : t('cron.confirm')}
                       </button>
                       <button
                         onClick={() => setConfirming(null)}
@@ -140,7 +140,7 @@ export default function CronPanel() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[13px]">
                 <div>
-                  <div className="uppercase tracking-wider" style={{ color: 'var(--hud-text-dim)', fontSize: '10px' }}>Schedule</div>
+                  <div className="uppercase tracking-wider" style={{ color: 'var(--hud-text-dim)', fontSize: '10px' }}>{t('cron.schedule')}</div>
                   <div style={{ color: 'var(--hud-primary)' }}>{job.schedule_display || job.schedule || '-'}</div>
                 </div>
                 <div>
@@ -159,15 +159,15 @@ export default function CronPanel() {
                   <div>{job.next_run_at ? new Date(job.next_run_at).toLocaleString() : '-'}</div>
                 </div>
                 <div>
-                  <div className="uppercase tracking-wider" style={{ color: 'var(--hud-text-dim)', fontSize: '10px' }}>Deliver</div>
+                  <div className="uppercase tracking-wider" style={{ color: 'var(--hud-text-dim)', fontSize: '10px' }}>{t('cron.deliver')}</div>
                   <div style={{ color: 'var(--hud-accent)' }}>{job.deliver || '-'}</div>
                 </div>
               </div>
 
               {job.repeat_completed != null && (
                 <div className="mt-2 text-[13px]" style={{ color: 'var(--hud-text-dim)' }}>
-                  Runs completed: {job.repeat_completed}{job.repeat_total ? ` / ${job.repeat_total}` : ''}
-                  {job.skills?.length > 0 && <span className="ml-2">Skills: {job.skills.join(', ')}</span>}
+                  {t('cron.runsCompleted')}: {job.repeat_completed}{job.repeat_total ? ` / ${job.repeat_total}` : ''}
+                  {job.skills?.length > 0 && <span className="ml-2">{t('cron.skills')}: {job.skills.join(', ')}</span>}
                 </div>
               )}
 
@@ -179,7 +179,7 @@ export default function CronPanel() {
 
               {job.paused_reason && (
                 <div className="mt-1 text-[12px]" style={{ color: 'var(--hud-warning)' }}>
-                  Paused: {job.paused_reason}
+                  {t('cron.pausedReason')}: {job.paused_reason}
                 </div>
               )}
             </div>

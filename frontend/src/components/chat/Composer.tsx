@@ -56,7 +56,7 @@ export default function Composer({ onSend, onCancel, isStreaming, model, disable
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={disabled ? 'Chat not available' : t('chat.placeholder')}
+          placeholder={disabled ? t('chat.notAvailable') : t('chat.placeholder')}
           disabled={isStreaming || disabled}
           rows={1}
           className="flex-1 px-2 py-1.5 text-[13px] resize-none outline-none"
@@ -78,9 +78,9 @@ export default function Composer({ onSend, onCancel, isStreaming, model, disable
               border: 'none',
               minHeight: '32px',
             }}
-            title="Stop generation"
+            title={t('chat.stopGeneration')}
           >
-            ■ Stop
+            ■ {t('chat.stop')}
           </button>
         ) : (
           <button
@@ -104,7 +104,7 @@ export default function Composer({ onSend, onCancel, isStreaming, model, disable
       >
         <span>{model !== 'unknown' ? model : ''}</span>
         <span style={{ color: isStreaming ? 'var(--hud-warning)' : 'var(--hud-text-dim)' }}>
-          {isStreaming ? t('chat.thinking') : 'Enter to send · Shift+Enter newline'}
+          {isStreaming ? t('chat.thinking') : t('chat.enterHint')}
         </span>
       </div>
     </div>

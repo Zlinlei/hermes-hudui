@@ -26,7 +26,7 @@ export default function CorrectionsPanel() {
   }
 
   return (
-    <Panel title={`${t('corrections.title')} — ${corrections.length} total`} className="col-span-full">
+    <Panel title={`${t('corrections.title')} — ${corrections.length} ${t('corrections.total')}`} className="col-span-full">
       {/* Summary */}
       <div className="flex gap-4 text-[13px] mb-3">
         {['critical', 'major', 'minor'].map(sev => {
@@ -35,7 +35,7 @@ export default function CorrectionsPanel() {
           const s = SEVERITY[sev]
           return (
             <span key={sev}>
-              <span style={{ color: s.color }}>{s.icon} {count} {sev}</span>
+              <span style={{ color: s.color }}>{s.icon} {count} {t(`corrections.${sev}` as any)}</span>
             </span>
           )
         })}
@@ -47,7 +47,7 @@ export default function CorrectionsPanel() {
       {/* Explanation */}
       {corrections.length > 0 && (
         <div className="text-[13px] italic mb-3" style={{ color: 'var(--hud-text-dim)' }}>
-          These are moments where I was wrong, corrected, or learned something the hard way. Critical = user caught a concrete error. Major = gotcha/pitfall absorbed. Minor = limitation noted.
+          {t('corrections.explanation')}
         </div>
       )}
 
@@ -60,7 +60,7 @@ export default function CorrectionsPanel() {
         return (
           <div key={sev} className="mb-4">
             <div className="text-[13px] font-bold mb-2" style={{ color: s.color }}>
-              {s.icon} {sev.toUpperCase()} ({items.length})
+              {s.icon} {t(`corrections.${sev}` as any).toUpperCase()} ({items.length})
             </div>
             <div className="space-y-2">
               {items.map((cor: any, i: number) => (
@@ -76,7 +76,7 @@ export default function CorrectionsPanel() {
                   </div>
                   <div className="text-[13px]" style={{ color: s.color }}>{cor.detail}</div>
                   {cor.session_title && (
-                    <div className="text-[13px] mt-1" style={{ color: 'var(--hud-text-dim)' }}>↳ session: {cor.session_title}</div>
+                    <div className="text-[13px] mt-1" style={{ color: 'var(--hud-text-dim)' }}>↳ {t('corrections.sessionPrefix')}: {cor.session_title}</div>
                   )}
                 </div>
               ))}
