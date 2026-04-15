@@ -6,27 +6,7 @@ import os
 from pathlib import Path
 
 from .models import ConfigState
-from .utils import default_hermes_dir
-
-try:
-    import yaml
-except ImportError:
-    yaml = None
-
-
-def _parse_yaml_simple(text: str) -> dict:
-    """Minimal YAML parser for flat/simple structures when PyYAML isn't available."""
-    result = {}
-    for line in text.split("\n"):
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if ":" in stripped:
-            key, _, val = stripped.partition(":")
-            val = val.strip()
-            if val:
-                result[key.strip()] = val
-    return result
+from .utils import default_hermes_dir, load_yaml
 
 
 def collect_config(hermes_dir: str | None = None) -> ConfigState:
@@ -38,15 +18,7 @@ def collect_config(hermes_dir: str | None = None) -> ConfigState:
     if not config_path.exists():
         return ConfigState()
 
-    content = config_path.read_text(encoding="utf-8")
-
-    if yaml:
-        try:
-            data = yaml.safe_load(content)
-        except Exception:
-            data = _parse_yaml_simple(content)
-    else:
-        data = _parse_yaml_simple(content)
+    data = load_yaml(config_path.read_text(encoding="utf-8"))
 
     if not isinstance(data, dict):
         return ConfigState()

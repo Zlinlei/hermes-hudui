@@ -221,6 +221,43 @@ class ConfigState:
     user_char_limit: int = 1375
 
 
+# ── Sudo ───────────────────────────────────────────────────
+
+@dataclass
+class SudoCommand:
+    timestamp: Optional[datetime]
+    command: str            # extracted sudo command text
+    outcome: str            # "success", "failed", "blocked", "unknown"
+    session_id: str = ""
+    session_title: Optional[str] = None
+
+
+@dataclass
+class SudoStats:
+    total_commands: int = 0
+    approved_count: int = 0
+    failed_count: int = 0
+    blocked_count: int = 0
+    commands_by_type: dict[str, int] = field(default_factory=dict)
+    daily_counts: list[dict] = field(default_factory=list)
+
+
+@dataclass
+class SudoConfig:
+    approval_mode: str = "manual"
+    approval_timeout: int = 60
+    command_allowlist: list[str] = field(default_factory=list)
+    redact_secrets: bool = True
+    tirith_enabled: bool = True
+
+
+@dataclass
+class SudoState:
+    config: SudoConfig = field(default_factory=SudoConfig)
+    stats: SudoStats = field(default_factory=SudoStats)
+    commands: list[SudoCommand] = field(default_factory=list)
+
+
 # ── Timeline Events ────────────────────────────────────────
 
 @dataclass

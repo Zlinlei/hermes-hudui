@@ -4,6 +4,33 @@ import os
 from datetime import datetime
 from typing import Optional
 
+try:
+    import yaml as _yaml
+except ImportError:
+    _yaml = None
+
+
+def load_yaml(text: str) -> dict:
+    """Parse YAML text, falling back to a simple key:value parser."""
+    if _yaml:
+        try:
+            data = _yaml.safe_load(text)
+            if isinstance(data, dict):
+                return data
+        except Exception:
+            pass
+    result: dict = {}
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if ":" in stripped:
+            key, _, val = stripped.partition(":")
+            val = val.strip()
+            if val:
+                result[key.strip()] = val
+    return result
+
 
 def default_hermes_dir(hermes_dir: str | None = None) -> str:
     """Return the hermes directory.

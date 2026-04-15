@@ -16,6 +16,7 @@ export const TABS = [
   { id: 'token-costs', labelKey: 'tab.token-costs', key: null },
   { id: 'corrections', labelKey: 'tab.corrections', key: null },
   { id: 'patterns', labelKey: 'tab.patterns', key: null },
+  { id: 'sudo', labelKey: 'tab.sudo', key: null },
 ] as const
 
 export type TabId = typeof TABS[number]['id']
