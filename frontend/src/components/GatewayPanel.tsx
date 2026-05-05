@@ -86,18 +86,28 @@ function ActionRunner({
   actionName,
   postPath,
   label,
+  description,
+  confirmLabel,
+  confirmPrompt,
+  showLastStatus = false,
   onStateChange,
 }: {
   actionName: string
   postPath: string
   label: string
+  description?: string
+  confirmLabel?: string
+  confirmPrompt?: string
+  showLastStatus?: boolean
   onStateChange: () => void
 }) {
   const { t } = useTranslation()
   const [polling, setPolling] = useState(false)
   const [status, setStatus] = useState<ActionStatus | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [confirming, setConfirming] = useState(false)
   const timerRef = useRef<number | null>(null)
+  const confirmTimerRef = useRef<number | null>(null)
   const mountedRef = useRef(true)
 
   useEffect(() => {
@@ -107,6 +117,10 @@ function ActionRunner({
       if (timerRef.current !== null) {
         window.clearTimeout(timerRef.current)
         timerRef.current = null
+      }
+      if (confirmTimerRef.current !== null) {
+        window.clearTimeout(confirmTimerRef.current)
+        confirmTimerRef.current = null
       }
     }
   }, [])
@@ -119,6 +133,7 @@ function ActionRunner({
       if (!mountedRef.current) return
       setStatus(data)
       if (data.running) {
+        setPolling(true)
         timerRef.current = window.setTimeout(pollOnce, 1000)
       } else {
         setPolling(false)
@@ -131,9 +146,26 @@ function ActionRunner({
     }
   }, [actionName, onStateChange])
 
+  useEffect(() => {
+    if (showLastStatus) {
+      pollOnce()
+    }
+  }, [pollOnce, showLastStatus])
+
   const trigger = async () => {
+    if (confirmPrompt && !confirming) {
+      setConfirming(true)
+      if (confirmTimerRef.current !== null) {
+        window.clearTimeout(confirmTimerRef.current)
+      }
+      confirmTimerRef.current = window.setTimeout(() => {
+        if (mountedRef.current) setConfirming(false)
+      }, 6000)
+      return
+    }
+
+    setConfirming(false)
     setError(null)
-    setStatus(null)
     setPolling(true)
     try {
       const res = await fetch(postPath, { method: 'POST' })
@@ -149,22 +181,44 @@ function ActionRunner({
 
   return (
     <div>
+      {description && (
+        <div className="mb-1 text-[12px]" style={{ color: 'var(--hud-text-dim)' }}>
+          {description}
+        </div>
+      )}
       <button
         onClick={trigger}
         disabled={polling}
         className="px-3 py-1.5 text-[13px] rounded"
         style={{
-          background: polling ? 'var(--hud-panel-alt, transparent)' : 'var(--hud-primary)',
+          background: polling
+            ? 'var(--hud-panel-alt, transparent)'
+            : confirming
+              ? 'var(--hud-warning)'
+              : 'var(--hud-primary)',
           color: polling ? 'var(--hud-text-dim)' : 'var(--hud-bg)',
           cursor: polling ? 'not-allowed' : 'pointer',
           border: '1px solid var(--hud-border)',
         }}
       >
-        {polling ? t('gateway.running') : label}
+        {polling ? t('gateway.running') : confirming ? (confirmLabel || label) : label}
       </button>
+      {confirming && confirmPrompt && (
+        <div className="mt-2 text-[12px]" style={{ color: 'var(--hud-warning)' }}>
+          {confirmPrompt}
+        </div>
+      )}
       {error && (
         <div className="mt-2 text-[12px]" style={{ color: 'var(--hud-error)' }}>
           {error}
+        </div>
+      )}
+      {status && showLastStatus && (
+        <div className="mt-2 text-[11px] space-y-0.5" style={{ color: 'var(--hud-text-dim)' }}>
+          <div>
+            {t('gateway.lastRun')}: {status.started_at ? timeAgo(new Date(status.started_at * 1000).toISOString()) : t('gateway.neverRun')}
+          </div>
+          <div className="font-mono truncate">{status.log_path}</div>
         </div>
       )}
       {status && status.lines.length > 0 && (
@@ -181,7 +235,7 @@ function ActionRunner({
       )}
       {status && !status.running && status.exit_code !== null && (
         <div className="mt-1 text-[11px]" style={{ color: status.exit_code === 0 ? 'var(--hud-success)' : 'var(--hud-error)' }}>
-          {t('gateway.exitCode')}: {status.exit_code}
+          {status.exit_code === 0 ? t('gateway.actionSucceeded') : t('gateway.actionFailed')} · {t('gateway.exitCode')}: {status.exit_code}
         </div>
       )}
     </div>
@@ -270,6 +324,10 @@ export default function GatewayPanel() {
                 actionName="hermes-update"
                 postPath="/api/hermes/update"
                 label={t('gateway.update')}
+                description={t('gateway.updateDescription')}
+                confirmLabel={t('gateway.confirmUpdate')}
+                confirmPrompt={t('gateway.updateConfirmPrompt')}
+                showLastStatus
                 onStateChange={refresh}
               />
             </div>
