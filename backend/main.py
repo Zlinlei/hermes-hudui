@@ -42,6 +42,7 @@ from .api import (
     gateway,
     model_info,
     plugins,
+    replay,
 )
 from .file_watcher import start_watcher, stop_watcher
 from .websocket_manager import ws_manager
@@ -131,6 +132,7 @@ app.include_router(providers.router, prefix="/api")
 app.include_router(gateway.router, prefix="/api")
 app.include_router(model_info.router, prefix="/api")
 app.include_router(plugins.router, prefix="/api")
+app.include_router(replay.router, prefix="/api")
 
 # Serve frontend static files (after API routes so /api takes priority)
 if STATIC_DIR.exists():

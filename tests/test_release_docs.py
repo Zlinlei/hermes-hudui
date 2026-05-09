@@ -36,3 +36,22 @@ def test_v080_release_docs_and_assets_are_in_sync() -> None:
     ]:
         assert (ROOT / "assets" / asset).exists()
         assert asset in readme or asset in release_notes
+
+
+def test_replay_launch_docs_and_assets_are_present() -> None:
+    readme = (ROOT / "README.md").read_text()
+    changelog = (ROOT / "CHANGELOG.md").read_text()
+
+    assert "## Hermes Replay" in readme
+    assert "assets/replay-tab.png" in readme
+    assert "assets/example-replay.redacted.json" in readme
+    assert "Safe Share Mode is the default export posture" in readme
+    assert "not external third-party attestation" in readme
+
+    assert "**Hermes Replay**" in changelog
+    assert "Replay launch assets" in changelog
+
+    assert (ROOT / "assets" / "replay-tab.png").exists()
+    example = ROOT / "assets" / "example-replay.redacted.json"
+    assert example.exists()
+    assert "[REDACTED_TERMINAL_OUTPUT]" in example.read_text()

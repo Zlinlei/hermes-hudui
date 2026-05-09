@@ -18,6 +18,8 @@ dependencies = [
     "uvicorn[standard]>=0.34.0",
     "pyyaml>=6.0",
     "watchfiles>=0.24.0",
+    "pillow>=10.0",
+    "cryptography>=42.0",
 ]
 
 [project.optional-dependencies]

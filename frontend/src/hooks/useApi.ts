@@ -9,8 +9,8 @@ const fetcher = async (url: string) => {
   return res.json()
 }
 
-export function useApi<T = any>(path: string, refreshInterval = 30000) {
-  return useSWR<T>(`/api${path}`, fetcher, {
+export function useApi<T = any>(path: string | null, refreshInterval = 30000) {
+  return useSWR<T>(path ? `/api${path}` : null, fetcher, {
     refreshInterval,
     revalidateOnFocus: false,
     dedupingInterval: 5000,
@@ -18,7 +18,7 @@ export function useApi<T = any>(path: string, refreshInterval = 30000) {
     errorRetryInterval: 2000,
     keepPreviousData: true, // Keep showing old data while fetching new data
     onError: (err) => {
-      console.warn(`[HUD] ${path}: ${err.message}`)
+      console.warn(`[HUD] ${path || 'disabled'}: ${err.message}`)
     },
   })
 }

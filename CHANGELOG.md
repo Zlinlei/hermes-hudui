@@ -4,6 +4,10 @@ All notable changes to hermes-hudui are documented here.
 
 ## [Unreleased]
 
+### Added
+- **Hermes Replay** — new Replay and Verify tabs turn local Hermes sessions into redacted run receipts with normalized timelines, proof artifacts, redaction review, Safe Share Mode exports, local hashes, Ed25519 signatures, fork JSON, share-card PNGs, static HTML/Markdown/JSON exports, and local public/unlisted publish directories.
+- **Replay launch assets** — README now documents local-only export behavior and includes the Replay tab screenshot plus an example redacted replay artifact.
+
 ---
 
 ## [0.8.0] — 2026-05-05

@@ -42,6 +42,26 @@ The Plugin Hub shows installed dashboard and agent plugins, extension entry poin
 
 Updates in real time via WebSocket. No manual refresh needed.
 
+## Hermes Replay
+
+Hermes Replay turns agent runs into redacted, shareable proof artifacts.
+
+![Hermes Replay tab](assets/replay-tab.png)
+
+Open the Replay tab, choose a Hermes session, inspect the normalized timeline, review the run receipt, and export static artifacts for sharing or attaching to issues and PRs. The MVP exporter writes local files under `~/.hermes-hud/replays/` and does not upload anything by default.
+
+Current local exports:
+
+- Redacted JSON replay
+- GitHub-ready Markdown
+- Standalone HTML replay
+- 1200 x 630 PNG share card
+- Fork-safe `fork.json`
+
+An example sanitized payload is included at [`assets/example-replay.redacted.json`](assets/example-replay.redacted.json).
+
+Safe Share Mode is the default export posture. It redacts raw tool arguments, terminal output, assistant reasoning, token-like values, emails, local paths, and other sensitive fields before writing share artifacts. Exports include local hashes and Ed25519 signatures generated on this machine; they prove local artifact integrity, not external third-party attestation.
+
 ## Language Support
 
 English (default) and Chinese. Click the language toggle at the far right of the header bar to switch. The choice persists to localStorage. When set to Chinese, chat responses from your agent also come back in Chinese.
@@ -64,7 +84,7 @@ The top tab bar is responsive: resize the browser and tabs stay reachable throug
 
 This is the browser companion to [hermes-hud](https://github.com/joeynyc/hermes-hud). Both read from the same `~/.hermes/` data directory independently — use either one, or both at the same time.
 
-The Web UI is fully standalone and adds features the TUI doesn't have: dedicated Memory, Skills, Sessions, Health, Providers, Gateway, Model, and Plugins tabs; per-model token and cost analytics; gateway managed-tool visibility; actionable diagnostics; command palette; live chat; theme switcher.
+The Web UI is fully standalone and adds features the TUI doesn't have: dedicated Memory, Skills, Sessions, Replay, Health, Providers, Gateway, Model, and Plugins tabs; per-model token and cost analytics; gateway managed-tool visibility; actionable diagnostics; command palette; live chat; theme switcher.
 
 If you also have the TUI installed, you can enable it with `pip install 'hermes-hudui[tui]'`.
 

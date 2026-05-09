@@ -8,6 +8,7 @@ import DashboardPanel from './components/DashboardPanel'
 import MemoryPanel from './components/MemoryPanel'
 import SkillsPanel from './components/SkillsPanel'
 import SessionsPanel from './components/SessionsPanel'
+import ReplayPanel from './components/ReplayPanel'
 import CronPanel from './components/CronPanel'
 import ProjectsPanel from './components/ProjectsPanel'
 import HealthPanel from './components/HealthPanel'
@@ -30,6 +31,7 @@ function TabContent({ tab }: { tab: TabId }) {
     case 'memory': return <MemoryPanel />
     case 'skills': return <SkillsPanel />
     case 'sessions': return <SessionsPanel />
+    case 'replay': return <ReplayPanel />
     case 'cron': return <CronPanel />
     case 'projects': return <ProjectsPanel />
     case 'health': return <HealthPanel />
@@ -54,6 +56,7 @@ const GRID_CLASS: Record<TabId, string> = {
   memory: 'grid-cols-1 sm:grid-cols-2',
   skills: 'grid-cols-1 lg:grid-cols-[2fr_1fr]',
   sessions: 'grid-cols-1 lg:grid-cols-[2fr_1fr]',
+  replay: 'grid-cols-1 lg:grid-cols-[360px_1fr]',
   cron: 'grid-cols-1',
   projects: 'grid-cols-1',
   health: 'grid-cols-1 sm:grid-cols-2',
@@ -95,6 +98,7 @@ export default function App() {
     })),
     // Add tabs without keyboard shortcuts
     { id: 'token-costs', label: 'tab.token-costs', shortcut: '', action: () => setActiveTab('token-costs') },
+    { id: 'replay', label: 'tab.replay', shortcut: '', action: () => setActiveTab('replay') },
     { id: 'plugins', label: 'tab.plugins', shortcut: '', action: () => setActiveTab('plugins') },
     { id: 'sudo', label: 'tab.sudo', shortcut: '', action: () => setActiveTab('sudo') },
   ], [])

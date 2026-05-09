@@ -7,6 +7,7 @@ export const TABS = [
   { id: 'memory', labelKey: 'tab.memory', key: '2' },
   { id: 'skills', labelKey: 'tab.skills', key: '3' },
   { id: 'sessions', labelKey: 'tab.sessions', key: '4' },
+  { id: 'replay', labelKey: 'tab.replay', key: null },
   { id: 'cron', labelKey: 'tab.cron', key: '5' },
   { id: 'projects', labelKey: 'tab.projects', key: '6' },
   { id: 'health', labelKey: 'tab.health', key: '7' },
