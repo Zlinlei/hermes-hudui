@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Panel from './Panel'
-import { useChat, useChatAvailability, useChatSessions, loadSavedSessions, loadMessages, saveMessages, removeMessages } from '../hooks/useChat'
+import { useChat, useChatAvailability, useChatSessions, loadSavedSessions, loadMessages, seedMessages, clearSessionStorage } from '../hooks/useChat'
 import SessionSidebar from './chat/SessionSidebar'
 import MessageThread from './chat/MessageThread'
 import Composer from './chat/Composer'
@@ -55,12 +55,14 @@ export default function ChatPanel() {
             const created = await createSession()
             if (created) {
               idMap.push({ oldId: s.id, newId: created.id })
-              // Migrate localStorage messages from old ID to new ID
+              // Migrate localStorage messages from old ID to new ID.
+              // seedMessages also updates a live Chat instance, in case
+              // auto-select already mounted the new session.
               const msgs = loadMessages(s.id)
               if (msgs.length > 0) {
-                saveMessages(created.id, msgs)
+                seedMessages(created.id, msgs)
               }
-              removeMessages(s.id)
+              clearSessionStorage(s.id)
             }
           }
           if (idMap.length > 0) {

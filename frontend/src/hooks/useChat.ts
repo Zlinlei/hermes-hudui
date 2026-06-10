@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
-import { useChat as useAiChat } from '@ai-sdk/react'
+import { Chat, useChat as useAiChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import type { UIMessage } from 'ai'
 import { useI18n } from '../i18n'
@@ -38,7 +38,9 @@ const SESSIONS_KEY = 'hud-chat-sessions'
 export function saveMessages(sessionId: string, msgs: UIMessage[]) {
   try {
     localStorage.setItem(MESSAGES_KEY(sessionId), JSON.stringify(msgs))
-  } catch { /* quota exceeded — silently skip */ }
+  } catch {
+    console.warn(`Chat history for ${sessionId} not persisted (storage quota?)`)
+  }
 }
 
 export function loadMessages(sessionId: string): UIMessage[] {
@@ -69,85 +71,122 @@ export function loadSavedSessions(): SessionSummary[] {
   } catch { return [] }
 }
 
+// ── Per-session Chat instances ─────────────────────────────────────────────
+//
+// Each session owns a Chat instance, so streams, persistence, and cancel
+// stay bound to the session they started in. Switching sessions swaps which
+// instance useChat subscribes to; an in-flight stream keeps writing to its
+// own instance in the background instead of bleeding into the new session.
+
+const chatInstances = new Map<string, Chat<UIMessage>>()
+
+// Read at request time by every session transport; kept current by useChat.
+const langRef = { current: 'en' }
+
+function getOrCreateChat(sessionId: string): Chat<UIMessage> {
+  let chat = chatInstances.get(sessionId)
+  if (!chat) {
+    chat = new Chat<UIMessage>({
+      id: sessionId,
+      messages: loadMessages(sessionId),
+      transport: new DefaultChatTransport({
+        api: `/api/chat/sessions/${sessionId}/message`,
+        prepareSendMessagesRequest({ messages, body, id, trigger, messageId }) {
+          return {
+            api: `/api/chat/sessions/${sessionId}/message`,
+            body: { id, messages, trigger, messageId, ...body, lang: langRef.current },
+          }
+        },
+      }),
+      // sessionId is captured at construction — a finished stream persists
+      // under the session it belongs to even if the user switched away.
+      // Evicted instances (ended sessions) must not resurrect deleted history.
+      onFinish: ({ messages: finishedMessages }) => {
+        if (chatInstances.get(sessionId) === chat) {
+          saveMessages(sessionId, finishedMessages)
+        }
+      },
+    })
+    chatInstances.set(sessionId, chat)
+  }
+  return chat
+}
+
+// Write-through seed: localStorage and any live instance stay in sync.
+export function seedMessages(sessionId: string, msgs: UIMessage[]) {
+  saveMessages(sessionId, msgs)
+  const chat = chatInstances.get(sessionId)
+  if (chat) chat.messages = msgs
+}
+
 export function clearSessionStorage(sessionId: string) {
+  const chat = chatInstances.get(sessionId)
+  if (chat) {
+    chat.stop().catch(() => { /* best effort */ })
+    chatInstances.delete(sessionId)
+  }
   removeMessages(sessionId)
 }
 
 // ── useChat ────────────────────────────────────────────────────────────────
 
+const IDLE_COMPOSER: ComposerState = {
+  model: 'unknown',
+  isStreaming: false,
+  contextTokens: 0,
+  status: 'idle',
+  elapsedMs: 0,
+  firstTokenMs: null,
+  totalMs: null,
+  processStartMs: null,
+  resumed: false,
+  recentFirstTokenAvgMs: null,
+  recentTotalAvgMs: null,
+  recentRuns: 0,
+}
+
 export function useChat(sessionId: string | null) {
   const { lang } = useI18n()
+  useEffect(() => {
+    langRef.current = lang
+  }, [lang])
 
-  // Refs stay current inside the transport without causing re-renders
+  // Latest session ID — used to drop async responses that raced a switch
   const sessionIdRef = useRef(sessionId)
-  sessionIdRef.current = sessionId
-  const langRef = useRef(lang)
-  langRef.current = lang
+  useEffect(() => {
+    sessionIdRef.current = sessionId
+  }, [sessionId])
 
-  // In-memory session message cache for fast switching
-  const messageCacheRef = useRef<Map<string, UIMessage[]>>(new Map())
-  const prevSessionIdRef = useRef<string | null>(null)
-
-  // Transport created once — injects session ID and lang per request
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: '/api/chat/placeholder', // overridden by prepareSendMessagesRequest
-        prepareSendMessagesRequest({ messages, body, id, trigger, messageId }) {
-          const sid = sessionIdRef.current ?? ''
-          return {
-            api: `/api/chat/sessions/${sid}/message`,
-            body: { id, messages, trigger, messageId, ...body, lang: langRef.current },
-          }
-        },
-      }),
-    [] // eslint-disable-line react-hooks/exhaustive-deps
+  // Swap to the session's instance; useAiChat re-subscribes when it changes.
+  // The null fallback is an inert placeholder (ChatPanel gates sends on an
+  // active session).
+  const chat = useMemo(
+    () => (sessionId ? getOrCreateChat(sessionId) : new Chat<UIMessage>({ messages: [] })),
+    [sessionId]
   )
 
-  const { messages, status, error, sendMessage, stop, setMessages, regenerate } = useAiChat({
-    transport,
+  const { messages, status, error, sendMessage, stop, regenerate } = useAiChat({
+    chat,
     experimental_throttle: 16,
-    onFinish: ({ messages: finishedMessages }) => {
-      const sid = sessionIdRef.current
-      if (sid) saveMessages(sid, finishedMessages)
-    },
   })
-
-  // Handle session switching: save outgoing, restore incoming
-  useEffect(() => {
-    const prevId = prevSessionIdRef.current
-    if (prevId && prevId !== sessionId) {
-      messageCacheRef.current.set(prevId, messages)
-    }
-    if (sessionId) {
-      setMessages(messageCacheRef.current.get(sessionId) ?? loadMessages(sessionId))
-    } else {
-      setMessages([])
-    }
-    prevSessionIdRef.current = sessionId
-  }, [sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Composer state (model name / streaming flag from backend)
-  const [composerState, setComposerState] = useState<ComposerState>({
-    model: 'unknown',
-    isStreaming: false,
-    contextTokens: 0,
-    status: 'idle',
-    elapsedMs: 0,
-    firstTokenMs: null,
-    totalMs: null,
-    processStartMs: null,
-    resumed: false,
-    recentFirstTokenAvgMs: null,
-    recentTotalAvgMs: null,
-    recentRuns: 0,
-  })
+  const [composerState, setComposerState] = useState<ComposerState>(IDLE_COMPOSER)
+
+  // Don't show the previous session's composer data while a fetch is in flight
+  const [composerSessionId, setComposerSessionId] = useState(sessionId)
+  if (composerSessionId !== sessionId) {
+    setComposerSessionId(sessionId)
+    setComposerState(IDLE_COMPOSER)
+  }
 
   const loadComposerState = useCallback(async () => {
-    const sid = sessionIdRef.current
+    const sid = sessionId
     if (!sid) return
     try {
       const response = await fetch(`/api/chat/sessions/${sid}/composer`)
+      // A response that raced a session switch must not clobber the new session
+      if (sessionIdRef.current !== sid) return
       if (response.ok) {
         const state = await response.json()
         setComposerState({
@@ -166,24 +205,26 @@ export function useChat(sessionId: string | null) {
         })
       }
     } catch { /* best effort */ }
-  }, [])
+  }, [sessionId])
 
+  // stop() and sessionId belong to the same instance, so cancel always
+  // targets the session whose stream is on screen.
   const cancelStream = useCallback(async () => {
     stop()
-    const sid = sessionIdRef.current
-    if (sid) {
+    if (sessionId) {
       try {
-        await fetch(`/api/chat/sessions/${sid}/cancel`, { method: 'POST' })
+        await fetch(`/api/chat/sessions/${sessionId}/cancel`, { method: 'POST' })
       } catch { /* best effort */ }
     }
-  }, [stop])
+  }, [stop, sessionId])
 
   return {
     messages,
     isStreaming: status === 'streaming' || status === 'submitted',
     composerState,
     error: error?.message ?? null,
-    sendMessage: (content: string) => sendMessage({ text: content }),
+    sendMessage: (content: string) =>
+      sessionId ? sendMessage({ text: content }) : Promise.resolve(),
     cancelStream,
     loadComposerState,
     regenerate,
