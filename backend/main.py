@@ -14,6 +14,16 @@ if sys.platform == "darwin":
     os.environ.setdefault("MallocStackLogging", "0")
     os.environ.setdefault("MallocLogFile", "/dev/null")
 
+# Ensure dirs that commonly hold the hermes CLI are on PATH even when the
+# server is launched with a minimal environment (systemd, cron, launchd).
+# Appended, so an existing PATH ordering is never overridden.
+_path_parts = [p for p in os.environ.get("PATH", "").split(os.pathsep) if p]
+_extra_dirs = [
+    d for d in (os.path.expanduser("~/.local/bin"), "/usr/local/bin")
+    if d not in _path_parts
+]
+os.environ["PATH"] = os.pathsep.join(_path_parts + _extra_dirs)
+
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles

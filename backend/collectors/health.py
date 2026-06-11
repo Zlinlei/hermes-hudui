@@ -465,7 +465,7 @@ def collect_health(hermes_dir: str | None = None) -> HealthState:
     state.database.extend([
         _schema_diag("sessions table", tables, columns, "sessions", session_columns),
         _schema_diag("messages table", tables, columns, "messages", {"session_id", "role", "content"}),
-        _schema_diag("tool calls table", tables, columns, "tool_calls"),
+        _schema_diag("tool calls column", tables, columns, "messages", {"tool_calls"}),
         _schema_diag("model analytics columns", tables, columns, "sessions", model_columns),
     ])
 

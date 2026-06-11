@@ -36,12 +36,8 @@ def _make_state_db(path: Path, include_messages: bool = True) -> None:
                 session_id TEXT,
                 role TEXT,
                 content TEXT,
+                tool_calls TEXT,
                 timestamp REAL
-            );
-            CREATE TABLE tool_calls (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id TEXT,
-                name TEXT
             );
             """
         )
@@ -89,6 +85,7 @@ def test_health_collects_readiness_freshness_and_feature_diagnostics(tmp_path: P
     database = _by_name(state.database)
     assert database["sessions table"].status == "ok"
     assert database["messages table"].status == "ok"
+    assert database["tool calls column"].status == "ok"
     assert database["model analytics columns"].status == "ok"
 
     features = _by_name(state.features)
