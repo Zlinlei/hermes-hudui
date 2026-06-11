@@ -7,6 +7,7 @@ interface SessionSidebarProps {
   onCreate: () => void
   loading?: boolean
   streamingSessionIds?: string[]
+  onCancelStream?: (sessionId: string) => void
 }
 
 export default function SessionSidebar({
@@ -16,6 +17,7 @@ export default function SessionSidebar({
   onCreate,
   loading,
   streamingSessionIds,
+  onCancelStream,
 }: SessionSidebarProps) {
   const { t } = useTranslation()
 
@@ -66,8 +68,18 @@ export default function SessionSidebar({
               <div className="text-[13px] font-bold flex items-center justify-between gap-1" style={{ color: 'var(--hud-text)' }}>
                 <span className="truncate">{session.title}</span>
                 {streamingSessionIds?.includes(session.id) && (
-                  <span className="text-[9px] animate-pulse shrink-0" style={{ color: 'var(--hud-primary)' }}>
-                    ●
+                  <span
+                    role="button"
+                    title={t('chat.stopGeneration')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onCancelStream?.(session.id)
+                    }}
+                    className="group/stop text-[9px] shrink-0 cursor-pointer px-0.5"
+                    style={{ color: 'var(--hud-primary)' }}
+                  >
+                    <span className="animate-pulse group-hover/stop:hidden">●</span>
+                    <span className="hidden group-hover/stop:inline">■</span>
                   </span>
                 )}
               </div>

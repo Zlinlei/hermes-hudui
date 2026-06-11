@@ -138,6 +138,16 @@ function getOrCreateChat(sessionId: string): Chat<UIMessage> {
   return chat
 }
 
+// Stop a session's stream and its backend process — works for backgrounded
+// sessions, not just the one on screen.
+export async function cancelSessionStream(sessionId: string) {
+  const chat = chatInstances.get(sessionId)
+  if (chat) await chat.stop().catch(() => { /* best effort */ })
+  try {
+    await fetch(`/api/chat/sessions/${sessionId}/cancel`, { method: 'POST' })
+  } catch { /* best effort */ }
+}
+
 // Write-through seed: localStorage and any live instance stay in sync.
 export function seedMessages(sessionId: string, msgs: UIMessage[]) {
   saveMessages(sessionId, msgs)
@@ -192,7 +202,7 @@ export function useChat(sessionId: string | null) {
     [sessionId]
   )
 
-  const { messages, status, error, sendMessage, stop, regenerate } = useAiChat({
+  const { messages, status, error, sendMessage, regenerate } = useAiChat({
     chat,
     experimental_throttle: 16,
   })
@@ -234,16 +244,9 @@ export function useChat(sessionId: string | null) {
     } catch { /* best effort */ }
   }, [sessionId])
 
-  // stop() and sessionId belong to the same instance, so cancel always
-  // targets the session whose stream is on screen.
   const cancelStream = useCallback(async () => {
-    stop()
-    if (sessionId) {
-      try {
-        await fetch(`/api/chat/sessions/${sessionId}/cancel`, { method: 'POST' })
-      } catch { /* best effort */ }
-    }
-  }, [stop, sessionId])
+    if (sessionId) await cancelSessionStream(sessionId)
+  }, [sessionId])
 
   return {
     messages,
