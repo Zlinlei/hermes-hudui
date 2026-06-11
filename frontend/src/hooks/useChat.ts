@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo, useSyncExternalStore } from 'react'
 import { Chat, useChat as useAiChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import type { UIMessage } from 'ai'
@@ -80,6 +80,31 @@ export function loadSavedSessions(): SessionSummary[] {
 
 const chatInstances = new Map<string, Chat<UIMessage>>()
 
+// Streaming registry: the sidebar shows which sessions are busy — including
+// backgrounded ones — without mounting a chat hook per session.
+const streamingListeners = new Set<() => void>()
+let streamingIds: string[] = []
+
+function recomputeStreaming() {
+  const ids: string[] = []
+  for (const [id, c] of chatInstances) {
+    if (c.status === 'streaming' || c.status === 'submitted') ids.push(id)
+  }
+  // Keep the snapshot reference stable when nothing changed
+  if (ids.length === streamingIds.length && ids.every((v, i) => v === streamingIds[i])) return
+  streamingIds = ids
+  streamingListeners.forEach((l) => l())
+}
+
+const subscribeStreaming = (onChange: () => void) => {
+  streamingListeners.add(onChange)
+  return () => { streamingListeners.delete(onChange) }
+}
+
+export function useStreamingSessions(): string[] {
+  return useSyncExternalStore(subscribeStreaming, () => streamingIds)
+}
+
 // Read at request time by every session transport; kept current by useChat.
 const langRef = { current: 'en' }
 
@@ -107,6 +132,7 @@ function getOrCreateChat(sessionId: string): Chat<UIMessage> {
         }
       },
     })
+    chat['~registerStatusCallback'](recomputeStreaming)
     chatInstances.set(sessionId, chat)
   }
   return chat
@@ -124,6 +150,7 @@ export function clearSessionStorage(sessionId: string) {
   if (chat) {
     chat.stop().catch(() => { /* best effort */ })
     chatInstances.delete(sessionId)
+    recomputeStreaming()
   }
   removeMessages(sessionId)
 }

@@ -6,6 +6,7 @@ interface SessionSidebarProps {
   onSelect: (sessionId: string) => void
   onCreate: () => void
   loading?: boolean
+  streamingSessionIds?: string[]
 }
 
 export default function SessionSidebar({
@@ -14,6 +15,7 @@ export default function SessionSidebar({
   onSelect,
   onCreate,
   loading,
+  streamingSessionIds,
 }: SessionSidebarProps) {
   const { t } = useTranslation()
 
@@ -61,8 +63,13 @@ export default function SessionSidebar({
                 borderLeft: activeSessionId === session.id ? '2px solid var(--hud-primary)' : '2px solid transparent',
               }}
             >
-              <div className="text-[13px] font-bold" style={{ color: 'var(--hud-text)' }}>
-                {session.title}
+              <div className="text-[13px] font-bold flex items-center justify-between gap-1" style={{ color: 'var(--hud-text)' }}>
+                <span className="truncate">{session.title}</span>
+                {streamingSessionIds?.includes(session.id) && (
+                  <span className="text-[9px] animate-pulse shrink-0" style={{ color: 'var(--hud-primary)' }}>
+                    ●
+                  </span>
+                )}
               </div>
               <div className="text-[11px] flex items-center gap-1" style={{ color: 'var(--hud-text-dim)' }}>
                 <span

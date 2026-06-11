@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Panel from './Panel'
-import { useChat, useChatAvailability, useChatSessions, loadSavedSessions, loadMessages, seedMessages, clearSessionStorage } from '../hooks/useChat'
+import { useChat, useChatAvailability, useChatSessions, useStreamingSessions, loadSavedSessions, loadMessages, seedMessages, clearSessionStorage } from '../hooks/useChat'
 import SessionSidebar from './chat/SessionSidebar'
 import MessageThread from './chat/MessageThread'
 import Composer from './chat/Composer'
@@ -20,6 +20,7 @@ export default function ChatPanel() {
     loadComposerState,
     regenerate,
   } = useChat(activeSessionId)
+  const streamingSessionIds = useStreamingSessions()
 
   const handleCreateSession = useCallback(async () => {
     const session = await createSession()
@@ -161,6 +162,7 @@ export default function ChatPanel() {
             onSelect={setActiveSessionId}
             onCreate={handleCreateSession}
             loading={loadingSessions}
+            streamingSessionIds={streamingSessionIds}
           />
         </div>
 
