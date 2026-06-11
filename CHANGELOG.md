@@ -6,6 +6,24 @@ All notable changes to hermes-hudui are documented here.
 
 ---
 
+## [0.9.1] — 2026-06-11
+
+### Fixed
+- **Cross-session chat state bugs** — each chat session now owns its own AI SDK Chat instance, so switching sessions mid-stream no longer bleeds the streaming response into the other session's thread, persists it under the wrong localStorage key, or cancels the wrong backend process. Composer state no longer leaks across rapid session switches, and ended sessions can't resurrect deleted history.
+- **Tool-calls health diagnostic** — the Health tab checked for a standalone `tool_calls` table, but hermes stores tool calls as a column on `messages`; the diagnostic always reported a false "table missing". It now checks the column (renamed to "tool calls column").
+- **Hermes CLI discovery** — `~/.local/bin` and `/usr/local/bin` are appended to PATH at startup so the chat engine finds the hermes CLI when the server is launched from a minimal environment (systemd, cron, launchd).
+
+### Added
+- **Streaming session indicators** — sessions in the chat sidebar show a pulsing dot while their response is streaming, including sessions streaming in the background after a switch.
+- **Stop backgrounded streams** — the streaming dot doubles as a stop control: hover swaps it to a stop icon, and clicking cancels that session's stream without switching away from the current one.
+
+### Verification
+- `pytest` (83 passed)
+- `cd frontend && npm run build`
+- Browser E2E coverage for mid-stream session switching, per-session localStorage persistence, background-stream indicators, and sidebar stream cancellation.
+
+---
+
 ## [0.9.0] — 2026-05-09
 
 ### Added
