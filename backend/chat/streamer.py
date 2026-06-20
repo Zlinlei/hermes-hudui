@@ -22,6 +22,7 @@ class ChatStreamer:
         self._current_message: str = ""
         self._current_tools: dict[str, ToolCall] = {}
         self._text_started: bool = False
+        self._reasoning_count: int = 0
 
     def emit(self, event: StreamingEvent) -> None:
         """Queue an event for streaming."""
@@ -72,11 +73,17 @@ class ChatStreamer:
         ))
 
     def emit_reasoning(self, content: str) -> None:
-        """Emit reasoning/thinking content."""
+        """Emit reasoning/thinking content as its own block.
+
+        Each call uses a fresh id so multiple reasoning blocks render
+        separately rather than collapsing into one on a shared id.
+        """
         self._close_text_block()
-        self.emit(StreamingEvent(type="reasoning-start", data={"id": "r0"}))
-        self.emit(StreamingEvent(type="reasoning-delta", data={"id": "r0", "delta": content}))
-        self.emit(StreamingEvent(type="reasoning-end", data={"id": "r0"}))
+        rid = f"r{self._reasoning_count}"
+        self._reasoning_count += 1
+        self.emit(StreamingEvent(type="reasoning-start", data={"id": rid}))
+        self.emit(StreamingEvent(type="reasoning-delta", data={"id": rid, "delta": content}))
+        self.emit(StreamingEvent(type="reasoning-end", data={"id": rid}))
 
     def emit_done(self) -> None:
         """Signal completion."""

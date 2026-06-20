@@ -53,11 +53,15 @@ def _emit_tool_events(streamer: "ChatStreamer", hermes_session_id: str) -> None:
     except Exception:
         return
 
-    seen_reasoning = False
+    # Emit every distinct reasoning block in timestamp order (interleaved with
+    # tool calls), not just the first — multi-step agents write reasoning per
+    # message. The set guards against a row's reasoning appearing more than once.
+    emitted_reasoning: set[str] = set()
     for row in rows:
-        if row["reasoning"] and not seen_reasoning:
-            streamer.emit_reasoning(row["reasoning"])
-            seen_reasoning = True
+        reasoning = row["reasoning"]
+        if reasoning and reasoning not in emitted_reasoning:
+            streamer.emit_reasoning(reasoning)
+            emitted_reasoning.add(reasoning)
 
         if row["tool_calls"]:
             try:

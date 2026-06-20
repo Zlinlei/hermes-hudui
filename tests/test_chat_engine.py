@@ -1,3 +1,4 @@
+import sqlite3
 import subprocess
 import time
 from pathlib import Path
@@ -167,6 +168,55 @@ def test_nonzero_process_without_stderr_emits_error(monkeypatch):
     assert errors
     assert "exited with code 2" in errors[0].data["errorText"]
     assert engine.get_composer_state(session.id).status == "error"
+
+
+def _seed_state_db(path, rows):
+    conn = sqlite3.connect(str(path))
+    conn.execute(
+        "CREATE TABLE messages "
+        "(session_id TEXT, tool_calls TEXT, reasoning TEXT, timestamp INTEGER)"
+    )
+    conn.executemany(
+        "INSERT INTO messages (session_id, tool_calls, reasoning, timestamp) "
+        "VALUES (?, ?, ?, ?)",
+        rows,
+    )
+    conn.commit()
+    conn.close()
+
+
+def test_emit_tool_events_emits_every_distinct_reasoning_block(monkeypatch, tmp_path):
+    import backend.chat.engine as engine_module
+    from backend.chat.streamer import ChatStreamer
+
+    _seed_state_db(
+        tmp_path / "state.db",
+        [
+            ("s1", None, "step one thinking", 1),
+            ("s1", '[{"id": "c1", "function": {"name": "search", "arguments": "{}"}}]', None, 2),
+            ("s1", None, "step two thinking", 3),
+            ("s1", None, "step two thinking", 4),  # exact duplicate — deduped
+            ("other", None, "unrelated session", 5),  # different session — ignored
+        ],
+    )
+    monkeypatch.setattr(engine_module, "default_hermes_dir", lambda *args: str(tmp_path))
+
+    streamer = ChatStreamer()
+    engine_module._emit_tool_events(streamer, "s1")
+    streamer.emit_done()
+    events = collect_events(streamer)
+
+    reasoning_deltas = [e for e in events if e.type == "reasoning-delta"]
+    # all distinct reasoning is emitted (was previously truncated to the first block)
+    assert [e.data["delta"] for e in reasoning_deltas] == [
+        "step one thinking",
+        "step two thinking",
+    ]
+    # each block gets a unique id so they don't collapse into one on the frontend
+    assert len({e.data["id"] for e in reasoning_deltas}) == 2
+    # reasoning stays interleaved with the tool call in timestamp order
+    sequence = [e.type for e in events if e.type in ("reasoning-delta", "tool-input-start")]
+    assert sequence == ["reasoning-delta", "tool-input-start", "reasoning-delta"]
 
 
 def test_cancel_stream_escalates_to_kill(monkeypatch):
