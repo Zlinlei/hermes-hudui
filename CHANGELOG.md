@@ -4,8 +4,24 @@ All notable changes to hermes-hudui are documented here.
 
 ## [Unreleased]
 
+---
+
+## [0.10.0] — 2026-06-27
+
 ### Added
 - **Replay remote publishing** — sync locally published replays to a static host (GitHub Pages or any git-backed site) from the new Remote Publishing panel. Builds a deployable gallery with relative links: public replays are indexed, unlisted replays live behind unguessable hash paths, and local filesystem paths/manifests are never shipped. Off by default; nothing is uploaded until the user configures a remote and explicitly syncs. Endpoints: `GET/PUT /api/replay/remote`, `POST /api/replay/remote/sync`.
+- **Write-path test coverage** — added tests for the memory, profiles, and cron write endpoints, plus version-robust route tests.
+
+### Fixed
+- **Chat reasoning truncation** — the chat engine no longer truncates reasoning captured from `state.db` after a turn completes.
+- **CI stability** — route tests are now version-robust and the frontend lockfile is kept in sync so CI passes deterministically.
+
+### Changed
+- **Repo cleanup** — removed stale docs, version drift, and dead code.
+
+### Verification
+- `pytest` (123 passed)
+- `cd frontend && npm run build`
 
 ---
 
