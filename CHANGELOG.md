@@ -4,6 +4,9 @@ All notable changes to hermes-hudui are documented here.
 
 ## [Unreleased]
 
+### Added
+- **Agent compatibility diagnostics** — the Health tab now reports two drift checks: *Agent data layout* (flags pre-0.17 `~/.hermes/` paths the HUD no longer reads, e.g. `memory/` → `memories/`, root `jobs.json` → `cron/jobs.json`) and *Agent schema version* (compares the live `state.db` schema version against the HUD-verified baseline). Both degrade to `ok` when data is absent and only warn on positively-detected drift, turning silent blank tabs into an actionable warning. Verified against **Hermes Agent v0.17.0** (state.db schema v16); baseline lives in `backend/collectors/health.py` (`VERIFIED_AGENT_VERSION`, `TESTED_SCHEMA_VERSIONS`).
+
 ---
 
 ## [0.10.0] — 2026-06-27

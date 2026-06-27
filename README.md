@@ -25,6 +25,8 @@ Open http://localhost:3001
 
 **Requirements:** Python 3.11+, Node.js 18+, a running Hermes agent with data in `~/.hermes/`
 
+**Verified against Hermes Agent v0.17.0** (state.db schema v16). The HUD reads `~/.hermes/` and the `hermes` CLI directly, so it tracks the agent's on-disk layout. The Health tab's *Agent data layout* and *Agent schema version* checks flag when your agent's data drifts from this baseline.
+
 On future runs:
 ```bash
 source venv/bin/activate && hermes-hudui

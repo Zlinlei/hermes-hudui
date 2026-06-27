@@ -74,6 +74,10 @@ class HealthState:
     hermes_cli_version: str = ""
 
     @property
+    def verified_agent_version(self) -> str:
+        return VERIFIED_AGENT_VERSION
+
+    @property
     def keys_ok(self) -> int:
         return sum(1 for k in self.keys if k.present)
 
@@ -103,6 +107,25 @@ class HealthState:
 
     def _diagnostics(self) -> list[DiagnosticStatus]:
         return self.readiness + self.freshness + self.database + self.features
+
+
+# --- Hermes Agent compatibility baseline -------------------------------------
+# The HUD reads ~/.hermes/ and shells out to the `hermes` CLI, so it is coupled
+# to the agent's on-disk schema and file layout. These constants record the
+# agent version this release was verified against and the state.db schema
+# version(s) known to be compatible. They drive the "Agent schema version" and
+# "Agent data layout" health diagnostics — drift surfaces as a warning instead
+# of a silently blank tab. Bump these when re-verifying against a newer agent.
+VERIFIED_AGENT_VERSION = "0.17.0"  # hermes-agent v0.17.0 (2026.6.19)
+TESTED_SCHEMA_VERSIONS = {16}
+
+# Pre-0.17 → current data-layout moves the HUD already follows. If an OLD path
+# is present while its replacement is absent, the agent data predates what this
+# HUD targets (label, old_relpath, new_relpath).
+LAYOUT_MIGRATIONS = [
+    ("memory", "memory", "memories"),
+    ("cron jobs", "jobs.json", "cron/jobs.json"),
+]
 
 
 # Known API keys to check
@@ -300,14 +323,17 @@ def _hermes_cli_info() -> tuple[str, str, str]:
         return "warning", path, "version check failed"
 
 
-def _db_tables_and_columns(db_path: Path) -> tuple[set[str], dict[str, set[str]], int, Optional[datetime]]:
+def _db_tables_and_columns(
+    db_path: Path,
+) -> tuple[set[str], dict[str, set[str]], int, Optional[datetime], Optional[int]]:
     if not db_path.exists():
-        return set(), {}, 0, None
+        return set(), {}, 0, None, None
 
     tables: set[str] = set()
     columns: dict[str, set[str]] = {}
     session_count = 0
     last_session_at: Optional[datetime] = None
+    schema_version: Optional[int] = None
     conn = sqlite3.connect(str(db_path))
     try:
         cursor = conn.cursor()
@@ -322,9 +348,14 @@ def _db_tables_and_columns(db_path: Path) -> tuple[set[str], dict[str, set[str]]
             session_count = int(count or 0)
             if latest:
                 last_session_at = datetime.fromtimestamp(float(latest))
+        if "schema_version" in tables:
+            cursor.execute("SELECT * FROM schema_version")
+            row = cursor.fetchone()
+            if row and isinstance(row[0], int):
+                schema_version = row[0]
     finally:
         conn.close()
-    return tables, columns, session_count, last_session_at
+    return tables, columns, session_count, last_session_at, schema_version
 
 
 def _schema_diag(
@@ -354,6 +385,69 @@ def _schema_diag(
             suggested_fix="Update Hermes or migrate/restore state.db so HUD can read the expected schema.",
         )
     return _diag(name, "ok", f"{table} ready", "database", depends_on=["state.db", table])
+
+
+def _schema_version_diag(version: Optional[int]) -> DiagnosticStatus:
+    """Compare the live state.db schema version against the verified baseline.
+
+    Degrades to ``ok`` when the version cannot be read (older agents, or test
+    fixtures without a schema_version table) so absence is never treated as a
+    failure — only a positively-detected newer/unknown version warns.
+    """
+    tested = ", ".join(str(v) for v in sorted(TESTED_SCHEMA_VERSIONS))
+    if version is None or version in TESTED_SCHEMA_VERSIONS:
+        detail = (
+            f"schema version not reported; HUD verified against schema {tested}"
+            if version is None
+            else f"schema v{version} matches verified baseline"
+        )
+        return _diag("Agent schema version", "ok", detail, "database", depends_on=["state.db"])
+    return _diag(
+        "Agent schema version",
+        "warning",
+        f"schema v{version} differs from HUD-verified schema {tested}; collectors may need updating",
+        "database",
+        depends_on=["state.db"],
+        suggested_fix=(
+            "Agent state.db schema drifted from the version this HUD was verified "
+            f"against (v{VERIFIED_AGENT_VERSION}). Verify collectors against the new "
+            "schema, then bump TESTED_SCHEMA_VERSIONS."
+        ),
+    )
+
+
+def _layout_diag(hermes_path: Path) -> DiagnosticStatus:
+    """Detect pre-0.17 ~/.hermes/ data layout the HUD no longer reads from.
+
+    Only flags when an OLD path exists while its current replacement is absent —
+    a fresh/empty dir (neither present) is reported ``ok`` so the check never
+    fires spuriously on new installs or test fixtures.
+    """
+    drifted: list[str] = []
+    for label, old_rel, new_rel in LAYOUT_MIGRATIONS:
+        old_path = hermes_path / old_rel
+        new_path = hermes_path / new_rel
+        if old_path.exists() and not new_path.exists():
+            drifted.append(f"{label}: found {old_rel}/, expected {new_rel}")
+    if drifted:
+        return _diag(
+            "Agent data layout",
+            "warning",
+            "; ".join(drifted),
+            "readiness",
+            depends_on=["Hermes Home"],
+            suggested_fix=(
+                f"Agent data predates the layout this HUD targets (v{VERIFIED_AGENT_VERSION}). "
+                "Update Hermes, or the affected tabs may read empty."
+            ),
+        )
+    return _diag(
+        "Agent data layout",
+        "ok",
+        f"matches verified layout (v{VERIFIED_AGENT_VERSION})",
+        "readiness",
+        depends_on=["Hermes Home"],
+    )
 
 
 def _feature_diag(
@@ -408,6 +502,7 @@ def collect_health(hermes_dir: str | None = None) -> HealthState:
         _file_diag("Logs", hermes_path / "logs", "readiness", "warning"),
         _file_diag("Model Cache", hermes_path / "models_dev_cache.json", "readiness", "warning"),
         _file_diag("Plugins", hermes_path / "plugins", "readiness", "warning"),
+        _layout_diag(hermes_path),
     ])
 
     cli_status, cli_path, cli_version = _hermes_cli_info()
@@ -422,9 +517,9 @@ def collect_health(hermes_dir: str | None = None) -> HealthState:
     ])
 
     try:
-        tables, columns, session_count, last_session_at = _db_tables_and_columns(state_db)
+        tables, columns, session_count, last_session_at, schema_version = _db_tables_and_columns(state_db)
     except sqlite3.DatabaseError as exc:
-        tables, columns, session_count, last_session_at = set(), {}, 0, None
+        tables, columns, session_count, last_session_at, schema_version = set(), {}, 0, None, None
         state.database.append(_diag(
             "state.db integrity",
             "broken",
@@ -467,6 +562,7 @@ def collect_health(hermes_dir: str | None = None) -> HealthState:
         _schema_diag("messages table", tables, columns, "messages", {"session_id", "role", "content"}),
         _schema_diag("tool calls column", tables, columns, "messages", {"tool_calls"}),
         _schema_diag("model analytics columns", tables, columns, "sessions", model_columns),
+        _schema_version_diag(schema_version),
     ])
 
     # Config — reuse the config collector
